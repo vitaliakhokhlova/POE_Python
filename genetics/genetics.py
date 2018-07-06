@@ -43,8 +43,10 @@ class NucleicAcid:
     def __init__(self, chain, RNA):
         if chain.find("U") != -1 and not RNA:
             print("Error: 'U' can not be in DNA")
+            return 0
         if chain.find("T") != -1 and RNA:
             print("Error: 'T' can not be in RNA")
+            return 0
         for c in chain:
             self.strand.append(Nucleotide(c))
         self.RNA = RNA
@@ -138,10 +140,10 @@ class Ribosome:
         return codonList
 
     def translate(self, NucleicAcid):
-        aminoAcidList = []
+        aminoAcidList = ""
         codonList = self.read_codons(NucleicAcid)
         for c in codonList:
-            aminoAcidList.append(AminoAcid(Ribosome.CODONS[c]))
+            aminoAcidList += Ribosome.CODONS[c]
         return aminoAcidList
 
     def factory(self, NucleicAcid):
@@ -149,8 +151,8 @@ class Ribosome:
         aminoAcidList = self.translate(NucleicAcid)
         peptide = []
         for a in aminoAcidList:
-            if a.symbol != ' ':
-                peptide.append(a)
+            if a != ' ':
+                peptide.append(AminoAcid(a))
             else:
                 if len(peptide) > 1:
                     peptideList.append(peptide)
@@ -159,24 +161,39 @@ class Ribosome:
 
 class AminoAcid:
     symbol = ''
-    name = ""
     trigram = ""
+    protein_letters_1to3 = {
+        'A': 'Ala', 'C': 'Cys', 'D': 'Asp',
+        'E': 'Glu', 'F': 'Phe', 'G': 'Gly', 'H': 'His',
+        'I': 'Ile', 'K': 'Lys', 'L': 'Leu', 'M': 'Met',
+        'N': 'Asn', 'P': 'Pro', 'Q': 'Gln', 'R': 'Arg',
+        'S': 'Ser', 'T': 'Thr', 'V': 'Val', 'W': 'Trp',
+        'Y': 'Tyr',
+    }
 
     def __init__(self, symbol):
         self.symbol = symbol
+        self.trigram = AminoAcid.protein_letters_1to3[symbol]
 
     def __repr__(self):
-        return f"{self.symbol}"
+        return f"{self.trigram}"
 
 
 
 dna = NucleicAcid(dna_string[0], False)
 print(dna)
-rna = dna.get_complementary(True);
-print(rna)
-codonList = Ribosome().read_codons(rna)
-aminoAcidList = Ribosome().translate(rna)
+rna1 = dna.get_complementary(True);
+print(rna1)
+rna2 = rna1.get_complementary(True);
+print(rna2)
+codonList = Ribosome().read_codons(rna1)
+aminoAcidList = Ribosome().translate(rna1)
 print(aminoAcidList)
-#peptideList = Ribosome().factory(rna)
-#print(peptideList)
-#print(len(peptideList))
+peptideList = Ribosome().factory(rna1)
+peptideList2 = Ribosome().factory(rna2)
+
+print(peptideList)
+print(peptideList2)
+
+print(len(peptideList))
+print(len(peptideList2))
